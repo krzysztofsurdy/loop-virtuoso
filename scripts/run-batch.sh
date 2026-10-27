@@ -228,6 +228,9 @@ while true; do
   esac
 
   progress_iteration_result "$backlog_file" "$iterations_run" "$item_id" "$step_id" "$action" "$stall_count" "$violation_count" "$cumulative_cost"
+
+  # Self-improve: record on-the-go signals for this iteration (best-effort, opt-in).
+  bash "$SCRIPT_DIR/capture.sh" "$backlog_file" >/dev/null 2>&1 || true
   tail -n 1 "$progress_log"
 
   if (( violation_count >= max_violations )); then
@@ -250,6 +253,8 @@ blocked="$(echo "$final_counts" | jq -r '.blocked')"
 progress_run_end "$backlog_file" "$stop_reason" "$iterations_run" "$cumulative_cost"
 tail -n 1 "$progress_log"
 events_emit "$backlog_file" "run_stopped" "$(jq -nc --arg reason "$stop_reason" '{reason: $reason}')"
+# Self-improve: one close-out capture for the finished run (best-effort, opt-in).
+bash "$SCRIPT_DIR/capture.sh" "$backlog_file" --close >/dev/null 2>&1 || true
 
 echo "----------------------------------------"
 echo "Stop reason : $stop_reason"

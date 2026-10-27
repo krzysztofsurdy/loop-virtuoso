@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-10-27
+
+### Added
+
+- Self-improvement loop (the compound loop), human-gated throughout:
+  - `/init-setup` scaffolds a workspace under the plugin's persistent space (`${CLAUDE_PLUGIN_DATA}`, with a state-home fallback) so a plugin update never deletes it: a learnings store, a signals log, and the capture opt-in (default on).
+  - On-the-go signal capture: at each iteration boundary (Mode A stop hook and Mode B batch) the loop records deterministic signals (a step past the retry threshold, repeated verify failures) and a retro marker at backlog close. No model on the hot path; de-duplicated by (kind, ref); opt-in via `/init-setup`.
+  - `/improve` reviews the signals and the learnings store, optionally runs the `research` skill, applies a durability gate (re-authored from EveryInc's Compound Engineering, no text copied), runs a five-outcome refresh (Keep/Update/Consolidate/Replace/Delete) honoring `retire_when`, and reports what is worth committing as a ready-to-apply diff. It never commits to a repo or wires an agent itself.
+  - A `self-improve` skill documents the workspace, the learning-file schema, the capture signals, and the `/improve` procedure.
+- Tests: `tests/test_init_setup.sh` and `tests/test_capture.sh`.
+
+### Changed
+
+- `plugin.json` homepage and repository now point at this repository (`krzysztofsurdy/loop-virtuoso`) rather than the former monorepo home.
+
 ## [2.2.1] - 2026-10-27
 
 ### Fixed

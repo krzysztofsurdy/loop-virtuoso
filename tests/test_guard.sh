@@ -116,6 +116,10 @@ test_secrets_blocks_secret_files_and_allows_templates() {
 }
 
 test_secrets_matches_the_playbook_script() {
+  # The parity target ships in the code-virtuoso monorepo, not in this standalone
+  # repo. Skip when it is absent; run the parity check when loop-virtuoso is
+  # checked out alongside it.
+  [[ -f "$SKILL_SECRETS" ]] || return 0
   local repo; repo="$(mk_repo)"
   guard_config '{"loop":{"guard":{"blockSecrets":true}}}'
   assert_file "$SKILL_SECRETS"
@@ -216,8 +220,12 @@ test_stop_gate_blocks_on_first_failure_with_output() {
 test_secrets_reads_glob_pattern_and_star_prefixed_globs() {
   local repo; repo="$(mk_repo)"
   guard_config '{"loop":{"guard":{"blockSecrets":true}}}'
+  # Always check our own hook; only compare against the monorepo parity target
+  # when it is present (it does not ship in this standalone repo).
+  local hooks=("$HOOKS/guard-secrets.sh")
+  [[ -f "$SKILL_SECRETS" ]] && hooks+=("$SKILL_SECRETS")
   local hook
-  for hook in "$HOOKS/guard-secrets.sh" "$SKILL_SECRETS"; do
+  for hook in "${hooks[@]}"; do
     assert_eq "$(secrets_rc "$hook" "$(tool_input_json "$repo" Glob '{"pattern":"**/.env"}')")" "2" "$hook Glob **/.env"
     assert_eq "$(secrets_rc "$hook" "$(tool_input_json "$repo" Glob '{"pattern":"*.env"}')")" "2" "$hook Glob *.env"
     assert_eq "$(secrets_rc "$hook" "$(tool_input_json "$repo" Grep '{"pattern":"KEY","glob":"*.env"}')")" "2" "$hook Grep glob *.env"

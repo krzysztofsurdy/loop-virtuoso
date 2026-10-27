@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Deterministic, backlog-driven autonomous execution loop for Claude Code",
-    "version": "2.2.1"
+    "version": "2.3.0"
   },
   "plugins": [
     {

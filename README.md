@@ -35,6 +35,8 @@ An agent that can write the files grading its own work will sometimes game the c
 | `/loop-virtuoso:doctor` | Read-only audit of your Claude Code setup: duplicate skills and agents, skill listing size, dead CLAUDE.md skill references, plaintext MCP secrets (key names only), settings gaps, orphan plugin caches. |
 | `/loop-virtuoso:eval-setup [suite] [-k N] [--arms setup,vanilla] [--max-cost-usd N]` | Measure your setup against vanilla Claude Code on a fixed task suite: pass@k, pass^k, delta, cost. Dry run first; real runs cost money. |
 | `/loop-virtuoso:scaffold <devcontainer\|issue-to-pr\|pilot-backlog> [--force]` | Copy a starter template to the git root. Refuses to overwrite; `--force` backs up first. |
+| `/loop-virtuoso:init-setup [--capture on\|off] [--retry N]` | Scaffold the self-improvement workspace in the plugin's persistent space (survives updates) and set the capture opt-in. Idempotent; never deletes learnings. |
+| `/loop-virtuoso:improve` | Review captured signals and the learnings store, optionally research current best practice, refresh the store, and report what is worth committing as a ready-to-apply diff. Human-gated: commits nothing itself. |
 | `/loop-virtuoso:help` | Show a short overview of the plugin and its commands. |
 
 ## Two modes
@@ -167,6 +169,29 @@ The statusline (`scripts/statusline.sh`) prints directory, branch, model, sessio
 `/loop-virtuoso:eval-setup` runs `scripts/eval-setup.sh`, which answers whether your CLAUDE.md, skills, plugins, hooks and MCP servers help on your own work. It runs every task in `.code-virtuoso/loop/evals/suite.json` k times in two arms: **setup** (a plain `claude -p`) and **vanilla** (the same call with `--safe-mode`, or `loop.evalSetup.vanillaArgs` when set). Each trial runs in a throwaway git worktree and is graded by the task's literal `verifyCommand`.
 
 The report gives pass@k, pass^k and cost per task and arm, and the setup minus vanilla delta. Each run appends a line to `.code-virtuoso/loop/evals/history.jsonl`, so you can compare runs over time. A real run makes tasks x arms x k paid calls, so the command always does a `--dry-run` first and asks before running; `--max-cost-usd` caps the spend. How to pick tasks and read the results: `references/setup-evals.md` in the `iteration-loop` skill.
+
+## Self-improvement (the compound loop)
+
+loop-virtuoso can learn across runs, and it does so without ever editing itself
+unsupervised. The cycle is three separable stages:
+
+1. **Capture (automatic, no model).** With capture opted in at `/init-setup`
+   (default on), the loop records deterministic signals during a run - a step
+   past the retry threshold, repeated verify failures, and a retro marker at
+   close - to `signals.jsonl` in the self-improve workspace. A signal is evidence,
+   not a conclusion.
+2. **Review (`/improve`, human-gated).** `/improve` reads the signals and the
+   learnings store, optionally researches current best practice, and applies a
+   durability gate: a signal becomes a learning only if a future run would
+   otherwise repeat the mistake or redo the investigation. It refreshes the store
+   (keep, update, consolidate, replace, delete, honoring `retire_when`) and
+   reports what is worth committing to a repo as a ready-to-apply diff. It never
+   commits or wires anything itself.
+3. **Read back.** Planning and execution consult the store frontmatter-first and
+   flag a learning that conflicts with the current code instead of applying it.
+
+The workspace lives in the plugin's persistent space so a plugin update never
+deletes it. Details are in the `self-improve` skill.
 
 ## Templates
 

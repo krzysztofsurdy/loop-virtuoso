@@ -104,6 +104,9 @@ esac
 
 progress_iteration_result "$BACKLOG_ABS" "$ITERATION" "$CURRENT_ITEM_ID" "$CURRENT_STEP_ID" "$ACTION" "$STALL_COUNT" "$VIOLATION_COUNT"
 
+# Self-improve: record on-the-go signals for this iteration (best-effort, opt-in).
+bash "$HOOK_DIR/../scripts/capture.sh" "$BACKLOG_ABS" >/dev/null 2>&1 || true
+
 NEXT=$(backlog_next_pending_step "$BACKLOG_ABS")
 COUNTS=$(backlog_counts "$BACKLOG_ABS")
 BLOCKED=$(echo "$COUNTS" | jq -r '.blocked')
@@ -114,6 +117,8 @@ stop_loop() {
   events_emit "$BACKLOG_ABS" "run_stopped" "$(jq -nc --arg reason "$1" '{reason: $reason}')"
   progress_append "$BACKLOG_ABS" "stop reason=$1"
   progress_run_end "$BACKLOG_ABS" "$1" "$ITERATION"
+  # Self-improve: one close-out capture for the finished run (best-effort, opt-in).
+  bash "$HOOK_DIR/../scripts/capture.sh" "$BACKLOG_ABS" --close >/dev/null 2>&1 || true
   verify_gate_snapshot_cleanup "$BACKLOG_ABS"
   rm -f "$STATE_FILE"
   exit 0
