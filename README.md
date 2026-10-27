@@ -5,11 +5,11 @@ A deterministic, backlog-driven autonomous execution loop for Claude Code. Feeds
 ## Installation
 
 ```
-/plugin marketplace add krzysztofsurdy/code-virtuoso
-/plugin install loop-virtuoso@code-virtuoso
+/plugin marketplace add krzysztofsurdy/loop-virtuoso
+/plugin install loop-virtuoso@loop-virtuoso
 ```
 
-The plugin ships from the [code-virtuoso](https://github.com/krzysztofsurdy/code-virtuoso) marketplace.
+This repository is loop-virtuoso's canonical home. It is also distributed through the [code-virtuoso](https://github.com/krzysztofsurdy/code-virtuoso) marketplace, whose entry points back here, so `/plugin install loop-virtuoso@code-virtuoso` installs the same plugin.
 
 ## Quickstart
 

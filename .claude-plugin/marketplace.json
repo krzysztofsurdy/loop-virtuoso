@@ -1,0 +1,17 @@
+{
+  "name": "loop-virtuoso",
+  "owner": {
+    "name": "Krzysztof Surdy"
+  },
+  "metadata": {
+    "description": "Deterministic, backlog-driven autonomous execution loop for Claude Code",
+    "version": "2.2.1"
+  },
+  "plugins": [
+    {
+      "name": "loop-virtuoso",
+      "source": "./",
+      "description": "Claude Code only. A backlog-driven delivery loop that feeds the agent one small item at a time and accepts it only when verify commands pass and a write-boundary guard approves. Also opt-in guard hooks, a settings hardener, a setup audit (doctor), setup evals against vanilla Claude Code, and starter templates. Ships hooks, scripts, commands, and 2 skills"
+    }
+  ]
+}
